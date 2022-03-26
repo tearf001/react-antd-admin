@@ -43,7 +43,7 @@ const LoginForm: FC = () => {
           <Checkbox>记住用户</Checkbox>
         </Form.Item>
         <Form.Item>
-          <Button htmlType="submit" type="primary" className="login-page-form_button">
+          <Button htmlType="submit" type="primary" className="login-page-form_button bg-black">
             登录
           </Button>
         </Form.Item>

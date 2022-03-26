@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import vitePluginImp from 'vite-plugin-imp';
 import svgrPlugin from 'vite-plugin-svgr';
-
+import WindiCSS from 'vite-plugin-windicss';
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
@@ -12,10 +12,10 @@ export default defineConfig({
     },
   },
   server: {
-    port: 8889,
+    port: parseInt(process.env.PORT!) || 8889,
     proxy: {
       '/api': {
-        target: `http://localhost:${process.env.PORT}/api`,
+        target: `http://localhost:${process.env.PROXY_PORT}/api`,
         // changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },
@@ -59,5 +59,6 @@ export default defineConfig({
         // ...svgr options (https://react-svgr.com/docs/options/)
       },
     }),
+    WindiCSS(),
   ],
 });
