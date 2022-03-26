@@ -2,7 +2,7 @@ import { lazy, FC } from 'react';
 import Dashboard from '@/pages/dashboard';
 import LoginPage from '@/pages/login';
 import LayoutPage from '@/pages/layout';
-import { Navigate, RouteObject } from 'react-router';
+import { Navigate } from 'react-router';
 import WrapperRouteComponent from './config';
 import { useRoutes } from 'react-router-dom';
 import { Ro } from '@/interface/route.interface';

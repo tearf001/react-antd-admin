@@ -8,7 +8,7 @@ import { getGlobalState } from '@/utils/getGloabal';
 import { getMenuList } from '@/api/layout.api';
 import { MenuList, MenuChild } from '@/interface/layout/menu.interface';
 import { useGuide } from '../guide/useGuide';
-import { Outlet, RouteObject, useLocation } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
 import { setUserItem } from '@/stores/user.store';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import { getFirstPathCode } from '@/utils/getFirstPathCode';

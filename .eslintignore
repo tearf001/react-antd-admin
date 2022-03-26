@@ -8,3 +8,14 @@ dist
 *.md
 *.log
 *.lock
+
+src/registerServiceWorker.js
+src/**/test/**
+config-overrides.js
+/public
+/build
+/dist
+react-app-env.d.ts
+/typings
+echarts-dark-theme.*
+!.eslintrc.js
