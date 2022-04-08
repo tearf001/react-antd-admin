@@ -35,13 +35,13 @@ const TabRoute: FC = () => {
   const newTabHolder: TabHolder = {
     name: routeConfig?.name || currentPath, // todo better name
     key: routeConfig?.key || currentPath,
-    page: routeConfig?.element, // 不要使用outlet ,否则形成嵌套循环
-    // access:routeConfig.access,
+    page: routeConfig?.element, // 不要使用outlet ,否则形成嵌套循环?
     uri: location.pathname,
     params,
   };
   const tab = tabList.current.get(newTabHolder.key);
   if (tab) {
+    // todo 还要比较参数?
     if (tab.uri !== location.pathname) {
       tabList.current.set(newTabHolder.key, newTabHolder);
     }
@@ -50,9 +50,6 @@ const TabRoute: FC = () => {
   }
 
   const closeTab = useMemoizedFn(selectKey => {
-    // 记录原真实路由,微前端可能修改
-    // keyLruSquence.newest.value.curPath = window.location.pathname
-    // navigate(keyLruSquence.get(selectKey).curPath,{replace:true});
     if (tabList.current.size >= 2) {
       tabList.current.delete(selectKey);
       const nextTab = last(Array.from(tabList.current.values()))!;
@@ -62,7 +59,6 @@ const TabRoute: FC = () => {
   });
 
   const selectTab = useMemoizedFn(selectKey => {
-    // 记录原真实路由,微前端可能修改
     navigate(getTabPath(tabList.current.get(selectKey)!), {
       replace: true,
     });
@@ -73,10 +69,8 @@ const TabRoute: FC = () => {
   return (
     <div className="multiple-tabs">
       <Tabs
-        // className={styles.tabs}
         activeKey={newTabHolder.key}
         onChange={selectTab}
-        // tabBarExtraContent={operations}
         tabPosition="top"
         animated
         tabBarGutter={-1}
