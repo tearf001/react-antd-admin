@@ -1,97 +1,102 @@
-import { useRef, ReactNode, FC, Suspense, useEffect } from 'react';
-import { last } from 'lodash-es';
-import { Params, useParams, generatePath, useLocation, useOutlet, useNavigate, Location } from 'react-router';
-import { Tabs } from 'antd';
+import { FC, ReactNode, Suspense, useRef } from 'react';
+import { Params, generatePath, useLocation, useNavigate, useParams } from 'react-router';
+import { matchRoutes } from 'react-router-dom';
+
 import { useMemoizedFn } from 'ahooks';
+import { useWhyDidYouUpdate } from 'ahooks';
+import { Tabs } from 'antd';
+import { last } from 'lodash-es';
+
 import { Ro } from '@/interface/route.interface';
+import { routeList } from '@/routes';
+
+import './tab.less';
+
+// import { Ro } from '@/interface/route.interface';
 
 type TabHolder = {
   key: string;
   name: string;
   page: ReactNode;
   // access:routeConfig.access,
-  location: Location;
+  uri: string;
   params: Params;
 };
 const { TabPane } = Tabs;
 
-const getTabPath = (tab: TabHolder) => generatePath(tab.location.pathname, tab.params);
+const getTabPath = (tab: TabHolder) => generatePath(tab.uri, tab.params);
 
-const generTabKey = (location: Location, mPath: string) => `${location.pathname},${mPath}`;
-
-// 从key中返回 ,号后面的字符
-const getTabMapKey = (key: string) => key.substring(key.indexOf(',') + 1, key.length);
-
-type TabRouteProps = {
-  routeConfig: Ro;
-  matchPath: string;
-};
-const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
-  const outlet = useOutlet();
+const TabRoute: FC = () => {
   const location = useLocation();
   const params = useParams();
   const navigate = useNavigate();
   const tabList = useRef(new Map<string, TabHolder>());
+  const currentPath = location.pathname;
 
-  useEffect(() => {
-    const tab = tabList.current.get(matchPath);
-    const newTab = {
-      name: routeConfig.name,
-      key: generTabKey(location, matchPath),
-      page: outlet,
-      // access:routeConfig.access,
-      location,
-      params,
-    };
-    if (tab) {
-      //TODO 还要比较参数?
-      if (tab.location.pathname !== location.pathname) {
-        tabList.current.set(matchPath, newTab);
-      }
-    } else {
-      tabList.current.set(matchPath, newTab);
+  const matches = matchRoutes(routeList, currentPath);
+  const routeConfig = matches ? (matches[matches.length - 1].route as any as Ro) : null;
+  const newTabHolder: TabHolder = {
+    name: routeConfig?.name || currentPath, // todo better name
+    key: routeConfig?.key || currentPath,
+    page: routeConfig?.element, // 不要使用outlet ,否则形成嵌套循环
+    // access:routeConfig.access,
+    uri: location.pathname,
+    params,
+  };
+  const tab = tabList.current.get(newTabHolder.key);
+  if (tab) {
+    if (tab.uri !== location.pathname) {
+      tabList.current.set(newTabHolder.key, newTabHolder);
     }
-  }, [location.pathname]);
-  
-  // useMemoizedFn => useCallback 也可以
+  } else {
+    tabList.current.set(newTabHolder.key, newTabHolder);
+  }
+
   const closeTab = useMemoizedFn(selectKey => {
+    // 记录原真实路由,微前端可能修改
+    // keyLruSquence.newest.value.curPath = window.location.pathname
+    // navigate(keyLruSquence.get(selectKey).curPath,{replace:true});
     if (tabList.current.size >= 2) {
-      tabList.current.delete(getTabMapKey(selectKey));
+      tabList.current.delete(selectKey);
       const nextTab = last(Array.from(tabList.current.values()))!;
 
       navigate(getTabPath(nextTab), { replace: true });
     }
   });
 
-  // useMemoizedFn => useCallback 也可以
   const selectTab = useMemoizedFn(selectKey => {
-    navigate(getTabPath(tabList.current.get(getTabMapKey(selectKey))!), {
+    // 记录原真实路由,微前端可能修改
+    navigate(getTabPath(tabList.current.get(selectKey)!), {
       replace: true,
     });
   });
 
-  const hierarchy = [...tabList.current.values()];
-  
-  // useWhyDidYouUpdate('useWhyDidYouUpdateTabRoutes', { ...props, ele,location,tabList });
+  // const hierarchy = Array.from(tabList.current.values()); // 每次都变化...
+
+  useWhyDidYouUpdate('useWhyDidYouUpdateTabRoutes', { location, tabList, tabListCurrent: tabList.current });
 
   return (
-    <Tabs
-      activeKey={generTabKey(location, matchPath)}
-      onChange={key => selectTab(key)}
-      tabPosition="top"
-      animated
-      tabBarGutter={-1}
-      hideAdd
-      type="editable-card"
-      size="small"
-      onEdit={targetKey => closeTab(targetKey)}
-    >
-      {hierarchy.map(item => (
-        <TabPane tab={item.name} key={item.key}>
-          <Suspense fallback={<h1>加载中...</h1>}>{item.page}</Suspense>
-        </TabPane>
-      ))}
-    </Tabs>
+    <div className="multiple-tabs">
+      <Tabs
+        // className={styles.tabs}
+        activeKey={newTabHolder.key}
+        onChange={selectTab}
+        // tabBarExtraContent={operations}
+        tabPosition="top"
+        animated
+        tabBarGutter={-1}
+        hideAdd
+        type="editable-card"
+        size="small"
+        onEdit={closeTab}
+      >
+        {[...tabList.current.values()].map(item => (
+          <TabPane tab={item.name} key={item.key}>
+            <Suspense fallback={<h1>加载中...</h1>}>{item.page}</Suspense>
+          </TabPane>
+        ))}
+      </Tabs>
+    </div>
   );
 };
 
