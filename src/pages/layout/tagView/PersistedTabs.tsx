@@ -58,7 +58,8 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
       //
     };
   }, [location.pathname]);
-
+  
+  // useMemoizedFn => useCallback 也可以
   const closeTab = useMemoizedFn(selectKey => {
     if (tabList.current.size >= 2) {
       tabList.current.delete(getTabMapKey(selectKey));
@@ -68,6 +69,7 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
     }
   });
 
+  // useMemoizedFn => useCallback 也可以
   const selectTab = useMemoizedFn(selectKey => {
     navigate(getTabPath(tabList.current.get(getTabMapKey(selectKey))!), {
       replace: true,
