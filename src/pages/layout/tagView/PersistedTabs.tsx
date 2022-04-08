@@ -51,10 +51,6 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
     } else {
       tabList.current.set(matchPath, newTab);
     }
-
-    return () => {
-      //
-    };
   }, [location.pathname]);
   
   // useMemoizedFn => useCallback 也可以
