@@ -12,13 +12,10 @@ import { routeList } from '@/routes';
 
 import './tab.less';
 
-// import { Ro } from '@/interface/route.interface';
-
 type TabHolder = {
   key: string;
   name: string;
   page: ReactNode;
-  // access:routeConfig.access,
   uri: string;
   params: Params;
 };
@@ -70,8 +67,6 @@ const TabRoute: FC = () => {
       replace: true,
     });
   });
-
-  // const hierarchy = Array.from(tabList.current.values()); // 每次都变化...
 
   useWhyDidYouUpdate('useWhyDidYouUpdateTabRoutes', { location, tabList, tabListCurrent: tabList.current });
 
