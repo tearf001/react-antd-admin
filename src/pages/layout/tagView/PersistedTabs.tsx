@@ -33,17 +33,9 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
   const location = useLocation();
   const params = useParams();
   const navigate = useNavigate();
-  // tabList 使用 ref ，避免二次render。
-  // const [tabList, setTabList] = useSafeState([]);
-  // tablist 结构为 key:matchPath,value:tabObject ;
-  // key == location.pathname
-  // tabObject中记录当下location。
   const tabList = useRef(new Map<string, TabHolder>());
 
-  // 确保tab
   useEffect(() => {
-    debugger;
-
     const tab = tabList.current.get(matchPath);
     const newTab = {
       name: routeConfig.name,
@@ -53,17 +45,8 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
       location,
       params,
     };
-    // console.log("tabList is",tabList);
-    // console.log("cur tab is:",tab);
-    // console.log('match matchPath is',matchPath);
-    // console.log('params is',params);
-    // console.log('location is',location);
-    // console.log('ele is',ele);
-
     if (tab) {
-      // 处理微前端情况，如发生路径修改则替换
-      // 还要比较参数
-      // 微端路由更新 如果key不更新的话。会导致页面丢失..
+      //TODO 还要比较参数?
       if (tab.location.pathname !== location.pathname) {
         tabList.current.set(matchPath, newTab);
       }
@@ -77,9 +60,6 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
   }, [location.pathname]);
 
   const closeTab = useMemoizedFn(selectKey => {
-    // 记录原真实路由,微前端可能修改
-    // keyLruSquence.newest.value.curPath = window.location.pathname
-    // navigate(keyLruSquence.get(selectKey).curPath,{replace:true});
     if (tabList.current.size >= 2) {
       tabList.current.delete(getTabMapKey(selectKey));
       const nextTab = last(Array.from(tabList.current.values()))!;
@@ -89,24 +69,19 @@ const TabRoute: FC<TabRouteProps> = ({ routeConfig, matchPath }) => {
   });
 
   const selectTab = useMemoizedFn(selectKey => {
-    // 记录原真实路由,微前端可能修改
     navigate(getTabPath(tabList.current.get(getTabMapKey(selectKey))!), {
       replace: true,
     });
   });
 
   const hierarchy = [...tabList.current.values()];
-
-  debugger;
-
+  
   // useWhyDidYouUpdate('useWhyDidYouUpdateTabRoutes', { ...props, ele,location,tabList });
 
   return (
     <Tabs
-      // className={styles.tabs}
       activeKey={generTabKey(location, matchPath)}
       onChange={key => selectTab(key)}
-      // tabBarExtraContent={operations}
       tabPosition="top"
       animated
       tabBarGutter={-1}
