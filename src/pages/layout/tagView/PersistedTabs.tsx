@@ -17,8 +17,6 @@ const { TabPane } = Tabs;
 
 const getTabPath = (tab: TabHolder) => generatePath(tab.location.pathname, tab.params);
 
-// tab的select key = location.pathname + , + matchpath
-// 以此解决 微端情况下 tab 的 key 相同导致页面可能丢失的问题。
 const generTabKey = (location: Location, mPath: string) => `${location.pathname},${mPath}`;
 
 // 从key中返回 ,号后面的字符
